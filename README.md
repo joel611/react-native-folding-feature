@@ -1,6 +1,7 @@
 # react-native-folding-feature
 
 Gather android folding feature information
+https://developer.android.com/reference/kotlin/androidx/window/layout/FoldingFeature
 
 ## Installation
 
@@ -10,13 +11,33 @@ npm install react-native-folding-feature
 
 ## Usage
 
-```js
-import { multiply } from 'react-native-folding-feature';
+Android set screen orientation at AndroidManifest.xml
 
-// ...
+example: android:screenOrientation="fullSensor"
 
-const result = await multiply(3, 7);
+
+### warp App component with FoldingFeatureProvider
+```tsx
+import { FoldingFeatureProvider } from 'react-native-folding-feature';
+
+...
+<FoldingFeatureProvider>
+  ... app component ...
+</FoldingFeatureProvider>
+...
+
 ```
+
+### Get the folding feature information
+
+```js
+import { useFoldingFeature } from 'react-native-folding-feature';
+
+...
+const { layoutInfo, isTableTop, isBook } = useFoldingFeature();
+...
+```
+
 
 ## Contributing
 

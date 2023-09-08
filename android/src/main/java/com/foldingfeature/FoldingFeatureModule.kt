@@ -33,14 +33,17 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
       onWindowLayoutInfoChange();
   }
 
-  init{
-      Log.d(logTag, "init")
-      onWindowLayoutInfoChange();
+  @ReactMethod
+  fun addListener(type: String?) {
   }
 
   @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
+  fun removeListeners(type: Int?) {
+  }
+
+  init{
+      Log.d(logTag, "init")
+      onWindowLayoutInfoChange();
   }
 
   private fun onWindowLayoutInfoChange(){

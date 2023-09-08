@@ -92,9 +92,7 @@ const useProvideFunc = (): FoldingFeatureContextProps => {
   useEffect(() => {
     FoldingFeature.initialise();
 
-    const eventEmitter = new NativeEventEmitter(
-      NativeModules.FoldingFeatureLayoutModule
-    );
+    const eventEmitter = new NativeEventEmitter(NativeModules.FoldingFeature);
     const subscription = eventEmitter.addListener(
       'FoldingFeatureLayoutChanged',
       (event) => {

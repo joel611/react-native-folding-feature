@@ -1,12 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text } from 'react-native';
 import { useFoldingFeature } from 'react-native-folding-feature';
 
 export default () => {
   const { layoutInfo, isTableTop, isBook } = useFoldingFeature();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Folding Feature Information</Text>
 
       <Text style={styles.blockText}>state: {layoutInfo.state}</Text>
@@ -28,7 +28,7 @@ export default () => {
         isTableTop: {isTableTop ? 'true' : 'false'}
       </Text>
       <Text style={styles.blockText}>isBook: {isBook ? 'true' : 'false'}</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 

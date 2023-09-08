@@ -1,8 +1,20 @@
 @objc(FoldingFeature)
-class FoldingFeature: NSObject {
+class FoldingFeature: RCTEventEmitter {
 
-  @objc(multiply:withB:withResolver:withRejecter:)
-  func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-    resolve(a*b)
+  @objc(initialise)
+  func initialise() -> Void {
+    // do nothing in ios
+  }
+
+  var hasEventListeners = false
+  override func startObserving() {
+    hasEventListeners = true
+  }
+  override func stopObserving() {
+    hasEventListeners = false
+  }
+
+  override func supportedEvents() -> [String]! {
+    return ["FoldingFeatureLayoutChanged"]
   }
 }
