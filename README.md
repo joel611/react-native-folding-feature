@@ -1,4 +1,6 @@
 # react-native-folding-feature
+![npm](https://img.shields.io/npm/dm/react-native-folding-feature)
+
 
 Gather android folding feature information
 https://developer.android.com/reference/kotlin/androidx/window/layout/FoldingFeature
