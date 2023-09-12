@@ -3,7 +3,8 @@ import { SafeAreaView, StyleSheet, Text } from 'react-native';
 import { useFoldingFeature } from 'react-native-folding-feature';
 
 export default () => {
-  const { layoutInfo, isTableTop, isBook } = useFoldingFeature();
+  const { layoutInfo, hingeAngle, isTableTop, isBook, isFlat, isClosed } =
+    useFoldingFeature();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -22,12 +23,19 @@ export default () => {
       <Text style={styles.blockText}>
         bounds: {`${JSON.stringify(layoutInfo.bounds)}`}
       </Text>
+      <Text style={styles.blockText}>
+        Hinge Angle: {`${JSON.stringify(hingeAngle)}`}
+      </Text>
 
       <Text style={styles.header}>Helpers: </Text>
       <Text style={styles.blockText}>
         isTableTop: {isTableTop ? 'true' : 'false'}
       </Text>
       <Text style={styles.blockText}>isBook: {isBook ? 'true' : 'false'}</Text>
+      <Text style={styles.blockText}>isFlat: {isFlat ? 'true' : 'false'}</Text>
+      <Text style={styles.blockText}>
+        isClosed: {isClosed ? 'true' : 'false'}
+      </Text>
     </SafeAreaView>
   );
 };

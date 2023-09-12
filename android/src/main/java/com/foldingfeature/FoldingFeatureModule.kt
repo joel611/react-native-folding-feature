@@ -1,5 +1,11 @@
 package com.foldingfeature
 
+import android.content.Context.SENSOR_SERVICE
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -18,6 +24,7 @@ import kotlinx.coroutines.launch
 import androidx.window.layout.WindowInfoTracker
 
 import android.util.Log
+import com.facebook.react.bridge.LifecycleEventListener
 
 class FoldingFeatureModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -26,11 +33,51 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
     return NAME
   }
   private val logTag:String = "FoldingFeatureModule"
+  private lateinit var sensorManager: SensorManager
+  private lateinit var hingeAngleSensor: Sensor
+
+  private val sensorEventListener = object: SensorEventListener {
+    override fun onSensorChanged(event: SensorEvent) {
+      val params = Arguments.createMap().apply {
+        putDouble("hingeAngle", event.values[0].toDouble())
+      }
+      sendEvent("FoldingFeatureHingeAngleChanged", params)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+    }
+  }
+
+  private val lifecycleEventListener = object: LifecycleEventListener{
+    override fun onHostResume() {
+      sensorManager.registerListener(sensorEventListener, hingeAngleSensor, SensorManager.SENSOR_DELAY_UI)
+    }
+
+    override fun onHostPause() {
+      sensorManager.unregisterListener(sensorEventListener, hingeAngleSensor)
+    }
+
+    override fun onHostDestroy() {
+    }
+  }
+
+  init{
+    run{
+      if(android.os.Build.VERSION.SDK_INT < 30) {
+        return@run
+      }
+      sensorManager = reactApplicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
+      hingeAngleSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
+      reactContext.addLifecycleEventListener(lifecycleEventListener)
+    }
+  }
 
   @ReactMethod
   fun initialise(){
-      Log.d(logTag, "initialise")
-      onWindowLayoutInfoChange();
+    Log.d(logTag, "initialise")
+    onWindowLayoutInfoChange();
+
   }
 
   @ReactMethod
@@ -41,17 +88,14 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
   fun removeListeners(type: Int?) {
   }
 
-  init{
-      Log.d(logTag, "init")
-      onWindowLayoutInfoChange();
-  }
+
 
   private fun onWindowLayoutInfoChange(){
-    getCurrentActivityOrResolveWithError(null)?.let { activity ->
+    getCurrentActivityOrResolveWithError()?.let { activity ->
       activity.lifecycleScope.launch {
         Log.d(logTag, "start")
         activity.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-          WindowInfoTracker.getOrCreate(activity)
+          val wit = WindowInfoTracker.getOrCreate(activity)
             .windowLayoutInfo(activity)
             .collect {layoutInfo ->
               if(layoutInfo.displayFeatures.isEmpty()) return@collect
@@ -89,16 +133,11 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
       .emit(eventName, params)
   }
 
-  private fun getCurrentActivityOrResolveWithError(promise: Promise?): FragmentActivity? {
+  private fun getCurrentActivityOrResolveWithError(): FragmentActivity? {
     (currentActivity as? FragmentActivity)?.let {
       return it
     }
-    promise?.resolve(createMissingActivityError())
     return null
-  }
-
-  private fun createMissingActivityError(){
-
   }
 
   companion object {

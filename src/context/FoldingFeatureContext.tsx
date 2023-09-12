@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  type PropsWithChildren,
 } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 
@@ -17,9 +18,11 @@ import {
 
 type FoldingFeatureContextProps = {
   layoutInfo: LayoutInfo;
+  hingeAngle: number;
   isTableTop: boolean;
   isBook: boolean;
-  isNormal: boolean;
+  isFlat: boolean;
+  isClosed: boolean;
 };
 
 export const FoldingFeatureContext = createContext<FoldingFeatureContextProps>({
@@ -29,10 +32,12 @@ export const FoldingFeatureContext = createContext<FoldingFeatureContextProps>({
     orientation: FoldingFeatureOrientation.VERTICAL,
     isSeparating: false,
   },
+  hingeAngle: 180,
   // helper state
   isTableTop: false,
   isBook: false,
-  isNormal: true,
+  isFlat: true,
+  isClosed: false,
 });
 
 export const useFoldingFeature = () => {
@@ -45,12 +50,11 @@ export const useFoldingFeature = () => {
   return context;
 };
 
-type ProviderProps = {
-  children: React.ReactElement | React.ReactElement[];
-};
-
-export const FoldingFeatureProvider = ({ children }: ProviderProps) => {
-  const value = useProvideFunc();
+export const FoldingFeatureProvider = ({
+  option,
+  children,
+}: PropsWithChildren<{ option: ProviderProps }>) => {
+  const value = useProvideFunc(option);
 
   return (
     <FoldingFeatureContext.Provider value={value}>
@@ -59,57 +63,78 @@ export const FoldingFeatureProvider = ({ children }: ProviderProps) => {
   );
 };
 
-const useProvideFunc = (): FoldingFeatureContextProps => {
+type ProviderProps = {
+  closeAngle: number;
+};
+
+const useProvideFunc = (option: ProviderProps): FoldingFeatureContextProps => {
   const [layoutInfo, setLayoutInfo] = useState<LayoutInfo>({
     state: FoldingFeatureState.FLAT,
     occlusionType: FoldingFeatureOcclusionType.NONE,
     orientation: FoldingFeatureOrientation.VERTICAL,
     isSeparating: false,
   });
+  const [hingeAngle, setHingeAngle] = useState<number>(180);
 
   const updateLayoutInfo = (event: LayoutInfo) => {
     setLayoutInfo(event);
   };
 
+  const isClosed = useMemo(() => {
+    return hingeAngle <= (option?.closeAngle || 20);
+  }, [hingeAngle, option]);
+
   const isTableTop = useMemo(() => {
     return (
+      !isClosed &&
       layoutInfo.state === FoldingFeatureState.HALF_OPENED &&
       layoutInfo.orientation === FoldingFeatureOrientation.HORIZONTAL
     );
-  }, [layoutInfo]);
+  }, [layoutInfo, isClosed]);
 
   const isBook = useMemo(() => {
     return (
+      !isClosed &&
       layoutInfo.state === FoldingFeatureState.HALF_OPENED &&
       layoutInfo.orientation === FoldingFeatureOrientation.VERTICAL
     );
-  }, [layoutInfo]);
+  }, [layoutInfo, isClosed]);
 
-  const isNormal = useMemo(() => {
-    return !(isTableTop || isBook);
-  }, [isTableTop, isBook]);
+  const isFlat = useMemo(() => {
+    return !isClosed && !(isTableTop || isBook);
+  }, [isTableTop, isBook, isClosed]);
 
   useEffect(() => {
     FoldingFeature.initialise();
 
     const eventEmitter = new NativeEventEmitter(NativeModules.FoldingFeature);
-    const subscription = eventEmitter.addListener(
+    const layoutSubscription = eventEmitter.addListener(
       'FoldingFeatureLayoutChanged',
       (event) => {
         console.debug('[FoldingFeature] LayoutChanged', event);
         updateLayoutInfo(event);
       }
     );
+    const hingeAngleSubscription = eventEmitter.addListener(
+      'FoldingFeatureHingeAngleChanged',
+      (event) => {
+        console.debug('[FoldingFeature] HingeAngleChanged', event);
+        setHingeAngle(event.hingeAngle);
+      }
+    );
 
     return () => {
-      subscription.remove();
+      layoutSubscription.remove();
+      hingeAngleSubscription.remove();
     };
   }, []);
 
   return {
     layoutInfo,
+    hingeAngle,
     isTableTop,
     isBook,
-    isNormal,
+    isFlat,
+    isClosed,
   };
 };
