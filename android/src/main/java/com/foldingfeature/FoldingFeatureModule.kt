@@ -33,8 +33,8 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
     return NAME
   }
   private val logTag:String = "FoldingFeatureModule"
-  private lateinit var sensorManager: SensorManager
-  private lateinit var hingeAngleSensor: Sensor
+  private val sensorManager by lazy { reactApplicationContext.getSystemService(SENSOR_SERVICE) as SensorManager }
+  private val hingeAngleSensor: Sensor? by lazy { sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)}
 
   private val sensorEventListener = object: SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
@@ -51,11 +51,15 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
 
   private val lifecycleEventListener = object: LifecycleEventListener{
     override fun onHostResume() {
-      sensorManager.registerListener(sensorEventListener, hingeAngleSensor, SensorManager.SENSOR_DELAY_UI)
+      hingeAngleSensor?.let{
+        sensorManager.registerListener(sensorEventListener, it, SensorManager.SENSOR_DELAY_UI)
+      }
     }
 
     override fun onHostPause() {
-      sensorManager.unregisterListener(sensorEventListener, hingeAngleSensor)
+      hingeAngleSensor?.let{
+        sensorManager.unregisterListener(sensorEventListener, it)
+      }
     }
 
     override fun onHostDestroy() {
@@ -67,8 +71,7 @@ class FoldingFeatureModule(reactContext: ReactApplicationContext) :
       if(android.os.Build.VERSION.SDK_INT < 30) {
         return@run
       }
-      sensorManager = reactApplicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
-      hingeAngleSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
+
       reactContext.addLifecycleEventListener(lifecycleEventListener)
     }
   }
