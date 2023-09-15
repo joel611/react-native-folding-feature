@@ -1,6 +1,6 @@
 {
   "name": "react-native-folding-feature",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Gather android folding feature information",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
