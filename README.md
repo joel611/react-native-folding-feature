@@ -15,20 +15,32 @@ npm install react-native-folding-feature
 
 Android set screen orientation at AndroidManifest.xml
 
-example: android:screenOrientation="fullSensor"
+```
+android:screenOrientation="fullSensor"
+```
 
 
-### warp App component with FoldingFeatureProvider
+### Warp App component with FoldingFeatureProvider
 ```tsx
 import { FoldingFeatureProvider } from 'react-native-folding-feature';
 
 ...
-<FoldingFeatureProvider>
+<FoldingFeatureProvider option={options}>
   ... app component ...
 </FoldingFeatureProvider>
 ...
 
 ```
+
+
+### Options
+| Prop | Type | Default | Description |
+| ---- | ---- | --------| ----------- |
+| closeAngle | number | 20 | Specifies the angle for close pose
+
+
+
+
 
 ### Get the folding feature information
 
@@ -39,6 +51,16 @@ import { useFoldingFeature } from 'react-native-folding-feature';
 const { layoutInfo, isTableTop, isBook } = useFoldingFeature();
 ...
 ```
+
+### useFoldingFeature Props
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+|layoutInfo | LayoutInfo | |Folding Feature from [android doc](https://developer.android.com/reference/kotlin/androidx/window/layout/FoldingFeature) |
+| hingeAngle | number | 180 |(range 0 - 180) acquire from [SensorManager](https://developer.android.com/reference/android/hardware/Sensor#TYPE_HINGE_ANGLE) |
+| isTableTop | boolean | false | HALF_OPENED & HORIZONTAL |
+| isBook | boolean | false| HALF_OPENED & VERTICAL  |
+| isFlat | boolean | true | |
+| isClosed | boolean | false | hingeAngle < closeAngle (default 20)|
 
 
 ## Contributing
