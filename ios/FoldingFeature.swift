@@ -15,6 +15,6 @@ class FoldingFeature: RCTEventEmitter {
   }
 
   override func supportedEvents() -> [String]! {
-    return ["FoldingFeatureLayoutChanged"]
+    return ["FoldingFeatureLayoutChanged", "FoldingFeatureHingeAngleChanged"]
   }
 }
