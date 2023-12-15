@@ -53,7 +53,7 @@ export const useFoldingFeature = () => {
 export const FoldingFeatureProvider = ({
   option,
   children,
-}: PropsWithChildren<{ option: ProviderProps }>) => {
+}: PropsWithChildren<{ option?: ProviderProps }>) => {
   const value = useProvideFunc(option);
 
   return (
@@ -67,7 +67,7 @@ type ProviderProps = {
   closeAngle: number;
 };
 
-const useProvideFunc = (option: ProviderProps): FoldingFeatureContextProps => {
+const useProvideFunc = (option?: ProviderProps): FoldingFeatureContextProps => {
   const [layoutInfo, setLayoutInfo] = useState<LayoutInfo>({
     state: FoldingFeatureState.FLAT,
     occlusionType: FoldingFeatureOcclusionType.NONE,
@@ -81,7 +81,7 @@ const useProvideFunc = (option: ProviderProps): FoldingFeatureContextProps => {
   };
 
   const isClosed = useMemo(() => {
-    return hingeAngle <= (option?.closeAngle || 20);
+    return hingeAngle <= (option?.closeAngle ?? 20);
   }, [hingeAngle, option]);
 
   const isTableTop = useMemo(() => {
